@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:viewmodels="clr-namespace:NetworkInfo.ViewModels" xmlns:events="clr-namespace:NetworkInfo.Events" x:DataType="viewmodels:MapViewModel"
+             x:Class="NetworkInfo.Views.MapPage">
+    <Shell.TitleView>
+        <Label Text="{Binding OperatorName}" FontSize="Medium" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" HorizontalOptions="Fill" VerticalOptions="Fill" TextColor="White" Padding="0" Margin="0"/>
+    </Shell.TitleView>
+    
+    <ContentPage.Content>
+        <ContentView Content="{Binding Map}" HorizontalOptions="Fill" Grid.Row="0"/>
+    </ContentPage.Content>
+</ContentPage>

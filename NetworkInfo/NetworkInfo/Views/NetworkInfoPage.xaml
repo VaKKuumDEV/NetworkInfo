@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:viewmodels="clr-namespace:NetworkInfo.ViewModels" xmlns:model="clr-namespace:NetworkInfo.Models" xmlns:plugin="clr-namespace:ProgressRingControl.Forms.Plugin;assembly=ProgressRing.Forms.Plugin" xmlns:pancakeview="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView" x:DataType="viewmodels:NetworkInfoViewModel"
+             x:Class="NetworkInfo.Views.NetworkInfoPage">
+    <Shell.TitleView>
+        <Label Text="{Binding OperatorName}" FontSize="Medium" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" HorizontalOptions="Fill" VerticalOptions="Fill" TextColor="White" Padding="0" Margin="0"/>
+    </Shell.TitleView>
+
+    <ContentPage.Content>
+        <StackLayout x:DataType="viewmodels:NetworkInfoViewModel" HorizontalOptions="Fill" VerticalOptions="Fill">
+            <Grid Padding="8" HorizontalOptions="Fill" VerticalOptions="Fill">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="40*"/>
+                    <RowDefinition Height="60*"/>
+                </Grid.RowDefinitions>
+
+                <Grid HorizontalOptions="Fill" VerticalOptions="Fill" Grid.Row="0" Padding="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="50*"/>
+                        <ColumnDefinition Width="50*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid HorizontalOptions="Fill" VerticalOptions="Fill" Grid.Column="0">
+                        <plugin:ProgressRing x:Name="SpeedProgressCurcle" RingThickness="8" Progress="{Binding SignalProp}" HorizontalOptions="Fill" VerticalOptions="Fill" WidthRequest="1000" HeightRequest="1000"/>
+                        <Label HorizontalOptions="Fill" VerticalOptions="Fill" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="52" FontAttributes="Bold">
+                            <Label.FormattedText>
+                                <FormattedString>
+                                    <Span Text="{Binding SignalPropStr}"/>
+                                    <Span Text="%"/>
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                    </Grid>
+
+                    <Grid HorizontalOptions="Fill" VerticalOptions="Fill" Grid.Column="1" Padding="8">
+                        <Image Source="{Binding StrengthImage}"/>
+                    </Grid>
+                </Grid>
+
+                <Grid HorizontalOptions="Fill" VerticalOptions="Fill" Grid.Row="1" Padding="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50*"/>
+                        <RowDefinition Height="50*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="50*"/>
+                        <ColumnDefinition Width="50*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <pancakeview:PancakeView CornerRadius="8" BackgroundColor="{StaticResource Primary}" Grid.Row="0" Grid.Column="0" Padding="4">
+                        <Grid HorizontalOptions="Fill" VerticalOptions="Fill">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="75*"/>
+                                <RowDefinition Height="25*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <Label Text="{Binding Address}" TextColor="White" HorizontalOptions="Fill" VerticalOptions="Fill" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="18" FontAttributes="None" Grid.Row="0"/>
+                            <Label Text="Адрес" TextColor="LightGray" HorizontalOptions="Fill" VerticalOptions="Fill" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="16" FontAttributes="None" Grid.Row="1"/>
+                        </Grid>
+                    </pancakeview:PancakeView>
+
+                    <pancakeview:PancakeView CornerRadius="8" BackgroundColor="{StaticResource Primary}" Grid.Row="1" Grid.Column="0" Padding="4">
+                        <Grid HorizontalOptions="Fill" VerticalOptions="Fill">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="75*"/>
+                                <RowDefinition Height="25*"/>
+                            </Grid.RowDefinitions>
+
+                            <Label TextColor="White" HorizontalOptions="Fill" VerticalOptions="Fill" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="18" FontAttributes="None">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="{Binding Internet.Speed}"/>
+                                        <Span Text="Кб/сек"/>
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <Label Text="Скорость интернета" TextColor="LightGray" HorizontalOptions="Fill" VerticalOptions="Fill" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="16" FontAttributes="None" Grid.Row="1"/>
+                        </Grid>
+                    </pancakeview:PancakeView>
+
+                    <pancakeview:PancakeView CornerRadius="8" BackgroundColor="{StaticResource Primary}" Grid.Row="0" Grid.Column="1" Padding="4">
+                        <Grid HorizontalOptions="Fill" VerticalOptions="Fill">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="75*"/>
+                                <RowDefinition Height="25*"/>
+                            </Grid.RowDefinitions>
+
+                            <Label TextColor="White" HorizontalOptions="Fill" VerticalOptions="Fill" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="18" FontAttributes="None">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="{Binding LocationLat}"/>
+                                        <Span Text=":"/>
+                                        <Span Text="{Binding LocationLong}"/>
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <Label Text="Координаты" TextColor="LightGray" HorizontalOptions="Fill" VerticalOptions="Fill" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="16" FontAttributes="None" Grid.Row="1"/>
+                        </Grid>
+                    </pancakeview:PancakeView>
+
+                    <pancakeview:PancakeView CornerRadius="8" BackgroundColor="{StaticResource Primary}" Grid.Row="1" Grid.Column="1" Padding="4">
+                        <Grid HorizontalOptions="Fill" VerticalOptions="Fill">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="75*"/>
+                                <RowDefinition Height="25*"/>
+                            </Grid.RowDefinitions>
+
+                            <Label TextColor="White" HorizontalOptions="Fill" VerticalOptions="Fill" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="18" FontAttributes="None">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="{Binding NetworkStrength}"/>
+                                        <Span Text=" дБ"/>
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                            <Label Text="Мощность сигнала" TextColor="LightGray" HorizontalOptions="Fill" VerticalOptions="Fill" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="16" FontAttributes="None" Grid.Row="1"/>
+                        </Grid>
+                    </pancakeview:PancakeView>
+                </Grid>
+            </Grid>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>
