@@ -135,8 +135,12 @@ class Database{
 		return $this->db->real_escape_string($str);
 	}
 	
-	public function getQuery($table, array $where = [], array $orders = [], ?int $limit = null, array $joins = []): ?array{
-		$sql = "SELECT * FROM " . $table;
+	public function getQuery($table, array $where = [], array $orders = [], ?int $limit = null, array $joins = [], ?string $distinctColumn = null): ?array{
+		$sql = "SELECT";
+		
+		if($distinctColumn != null) $sql .= ' DISTINCT(' . $distinctColumn . ')';
+		else $sql .= ' *';
+		$sql .= ' FROM ' . $table;
 		
 		if(count($joins) > 0){
 			$w = [];
@@ -195,7 +199,6 @@ class Database{
 		
 		if(is_numeric($limit)) $sql .= " LIMIT " . $limit;
 		
-		//var_dump($sql); echo '<br>';
 		$result = $this->query($sql);
 		return $result;
 	}

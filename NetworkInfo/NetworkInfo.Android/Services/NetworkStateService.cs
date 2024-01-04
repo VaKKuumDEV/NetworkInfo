@@ -1,6 +1,6 @@
 ﻿using Android.App;
 using Android.Content;
-using Android.Media.TV;
+using Android.Net;
 using Android.OS;
 using Android.Telephony;
 using NetworkInfo.Droid.Services;
@@ -54,11 +54,23 @@ namespace NetworkInfo.Droid.Services
                                 CellIdentityGsm identityGsm = ((CellInfoGsm)info).CellIdentity;
                                 cellList.Add(new StationInfo(identityGsm.Cid, identityGsm.Lac, gsm.Dbm));
                             }
+                            else if(info.GetType() == typeof(CellInfoWcdma))
+                            {
+                                CellSignalStrengthWcdma wcdma = ((CellInfoWcdma)info).CellSignalStrength;
+                                CellIdentityWcdma identityWcdma = ((CellInfoWcdma)info).CellIdentity;
+                                cellList.Add(new StationInfo(identityWcdma.Cid, identityWcdma.Lac, wcdma.Dbm));
+                            }
                             else if (info.GetType() == typeof(CellInfoLte))
                             {
                                 CellSignalStrengthLte lte = ((CellInfoLte)info).CellSignalStrength;
                                 CellIdentityLte identityLte = ((CellInfoLte)info).CellIdentity;
                                 cellList.Add(new StationInfo(identityLte.Ci, identityLte.Tac, lte.Dbm));
+                            }
+                            else if(info.GetType() == typeof(CellInfoNr))
+                            {
+                                CellSignalStrengthNr nr = (CellSignalStrengthNr)((CellInfoNr)info).CellSignalStrength;
+                                CellIdentityNr identityNr = (CellIdentityNr)((CellInfoNr)info).CellIdentity;
+                                cellList.Add(new StationInfo(identityNr.Pci, identityNr.Tac, nr.Dbm));
                             }
                         }
                         catch (Exception) { }
@@ -77,7 +89,50 @@ namespace NetworkInfo.Droid.Services
             List<StationInfo> stations = await GetStations();
             int strength = 0;
             if (stations.Count > 0) strength = stations[0].Dbm;
-            return new Models.NetworkInfo(operatorName, strength);
+            return new Models.NetworkInfo(operatorName, strength, GetNetworkClass());
+        }
+
+        public static Models.NetworkInfo.NetworkTypes GetNetworkClass()
+        {
+            ConnectivityManager cm = (ConnectivityManager)Application.Context.GetSystemService(Context.ConnectivityService);
+
+            Network info = cm.ActiveNetwork;
+            if (info == null) return Models.NetworkInfo.NetworkTypes.NOT_CONNECTED;
+
+            NetworkCapabilities actNw = cm.GetNetworkCapabilities(info);
+            if (actNw == null) return Models.NetworkInfo.NetworkTypes.NOT_CONNECTED;
+            if (actNw != null && actNw.HasTransport(TransportType.Wifi)) return Models.NetworkInfo.NetworkTypes.WIFI;
+
+            TelephonyManager mTelephonyManager = (TelephonyManager)Application.Context.GetSystemService(Context.TelephonyService);
+            NetworkType networkType = mTelephonyManager.DataNetworkType;
+            switch (networkType)
+            {
+                case NetworkType.Gprs:
+                case NetworkType.Edge:
+                case NetworkType.Cdma:
+                case NetworkType.OneXrtt:
+                case NetworkType.Iden:
+                case NetworkType.Gsm:
+                    return Models.NetworkInfo.NetworkTypes.GSM;
+                case NetworkType.Umts:
+                case NetworkType.Evdo0:
+                case NetworkType.EvdoA:
+                case NetworkType.Hsdpa:
+                case NetworkType.Hsupa:
+                case NetworkType.Hspa:
+                case NetworkType.EvdoB:
+                case NetworkType.Ehrpd:
+                case NetworkType.Hspap:
+                case NetworkType.TdScdma:
+                    return Models.NetworkInfo.NetworkTypes.EDGE;
+                case NetworkType.Iwlan:
+                case NetworkType.Lte:
+                    return Models.NetworkInfo.NetworkTypes.LTE;
+                case NetworkType.Nr:
+                    return Models.NetworkInfo.NetworkTypes.NR;
+            }
+
+            return Models.NetworkInfo.NetworkTypes.NOT_CONNECTED;
         }
     }
 }

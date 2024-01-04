@@ -26,6 +26,13 @@ namespace NetworkInfo.ViewModels
             set => SetProperty(ref _strengthValue, value);
         }
 
+        public string _networkType = "NaN";
+        public string NetworkType
+        {
+            get => _networkType;
+            set => SetProperty(ref _networkType, value);
+        }
+
         private string _address = "Загрузка...";
         public string Address
         {
@@ -105,29 +112,55 @@ namespace NetworkInfo.ViewModels
                         Address = NetworkInfoService.Instance.Address;
                         Internet = NetworkInfoService.Instance.Internet;
 
+                        Models.NetworkInfo.NetworkTypes networkType = NetworkInfoService.Instance.Network.Type;
+                        string networkName = "Нет сети";
+                        if (networkType == Models.NetworkInfo.NetworkTypes.GSM) networkName = "2G";
+                        else if (networkType == Models.NetworkInfo.NetworkTypes.EDGE) networkName = "3G";
+                        else if (networkType == Models.NetworkInfo.NetworkTypes.LTE) networkName = "4G";
+                        else if (networkType == Models.NetworkInfo.NetworkTypes.NR) networkName = "5G";
+                        else if (networkType == Models.NetworkInfo.NetworkTypes.WIFI) networkName = "WiFi";
+                        NetworkType = networkName;
+
                         LocationLat = Location.Latitude.ToString("0.0000");
                         LocationLong = Location.Longitude.ToString("0.0000");
 
-                        SignalLevels level = SignalLevels.VERY_LOW;
-                        if (NetworkStrength <= -105 && NetworkStrength > -110) level = SignalLevels.LOW;
-                        else if (NetworkStrength <= -95 && NetworkStrength > -105) level = SignalLevels.MEDIUM;
-                        else if (NetworkStrength <= -85 && NetworkStrength > -95) level = SignalLevels.HIGH;
-                        else if (NetworkStrength > -85) level = SignalLevels.VERY_HIGH;
+                        if(networkType == Models.NetworkInfo.NetworkTypes.NOT_CONNECTED || networkType == Models.NetworkInfo.NetworkTypes.WIFI) StrengthImage = "signal_no.png";
+                        else
+                        {
+                            SignalLevels level = SignalLevels.VERY_LOW;
+                            if (networkType == Models.NetworkInfo.NetworkTypes.LTE || networkType == Models.NetworkInfo.NetworkTypes.NR)
+                            {
+                                if (NetworkStrength <= -110 && NetworkStrength > -115) level = SignalLevels.LOW;
+                                else if (NetworkStrength <= -105 && NetworkStrength > -110) level = SignalLevels.MEDIUM;
+                                else if (NetworkStrength <= -100 && NetworkStrength > -105) level = SignalLevels.HIGH;
+                                else if (NetworkStrength > -95) level = SignalLevels.VERY_HIGH;
+                            }
+                            else
+                            {
+                                if (NetworkStrength <= -105 && NetworkStrength > -110) level = SignalLevels.LOW;
+                                else if (NetworkStrength <= -95 && NetworkStrength > -105) level = SignalLevels.MEDIUM;
+                                else if (NetworkStrength <= -85 && NetworkStrength > -95) level = SignalLevels.HIGH;
+                                else if (NetworkStrength > -85) level = SignalLevels.VERY_HIGH;
+                            }
 
-                        if (level == SignalLevels.VERY_LOW || level == SignalLevels.LOW) StrengthImage = "signal_1.png";
-                        else if (level == SignalLevels.MEDIUM) StrengthImage = "signal_2.png";
-                        else if (level == SignalLevels.HIGH) StrengthImage = "signal_3.png";
-                        else if (level == SignalLevels.VERY_HIGH) StrengthImage = "signal_4.png";
+                            if (level == SignalLevels.VERY_LOW || level == SignalLevels.LOW) StrengthImage = "signal_1.png";
+                            else if (level == SignalLevels.MEDIUM) StrengthImage = "signal_2.png";
+                            else if (level == SignalLevels.HIGH) StrengthImage = "signal_3.png";
+                            else if (level == SignalLevels.VERY_HIGH) StrengthImage = "signal_4.png";
+                        }
 
                         try
                         {
-                            List<PreparedData> points = await WebApi.GetLastRaw(OperatorName, Location.Latitude, Location.Longitude, 1000);
-                            if (points.Count > 0)
+                            if(networkType != Models.NetworkInfo.NetworkTypes.NOT_CONNECTED && networkType != Models.NetworkInfo.NetworkTypes.WIFI)
                             {
-                                points.Sort((a, b) => Distance.BetweenPositions(new Position(Location.Latitude, Location.Longitude), new Position(a.Lat, a.Long)).Meters > Distance.BetweenPositions(new Position(Location.Latitude, Location.Longitude), new Position(b.Lat, b.Long)).Meters ? 1 : -1);
-                                LastNearPoint = points[0];
-                                SignalProp = Internet.Speed / LastNearPoint.Speed;
-                                SignalPropStr = (SignalProp * 100).ToString("0");
+                                List<PreparedData> points = await WebApi.GetLastRaw(OperatorName, Location.Latitude, Location.Longitude, 1000, networkType);
+                                if (points.Count > 0)
+                                {
+                                    points.Sort((a, b) => Distance.BetweenPositions(new Position(Location.Latitude, Location.Longitude), new Position(a.Lat, a.Long)).Meters > Distance.BetweenPositions(new Position(Location.Latitude, Location.Longitude), new Position(b.Lat, b.Long)).Meters ? 1 : -1);
+                                    LastNearPoint = points[0];
+                                    SignalProp = Internet.Speed / LastNearPoint.Speed;
+                                    SignalPropStr = (SignalProp * 100).ToString("0");
+                                }
                             }
                         }
                         catch (Exception) { }

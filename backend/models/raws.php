@@ -40,6 +40,7 @@ class RawsModel{
 			'speed' => intval($data['row_speed']),
 			'strength' => floatval($data['row_strength']),
 			'device' => $data['row_device'],
+			'type' => intval($data['row_type']),
 		];
 		
 		return $newRow;
@@ -57,7 +58,7 @@ class RawsModel{
 		return $angle * $earthRadius;
 	}
 	
-	private function averagePoints(array $points, array $notViewed, array $seen = [], int $averageRadius = 50): array{
+	private function averagePoints(array $points, array $notViewed, array $seen = [], int $averageRadius = 50, int $type): array{
 		$resultPoints = [];
 		while(count($notViewed) > 0){
 			if(in_array($notViewed[0]['id'], $seen)) continue;
@@ -86,6 +87,7 @@ class RawsModel{
 				'strength' => round($strengthSum / $count),
 				'radius' => $averageRadius,
 				'device' => "",
+				'type' => $type,
 			];
 			$resultPoints[] = $averagedPoint;
 			
@@ -98,8 +100,20 @@ class RawsModel{
 		return $resultPoints;
 	}
 	
-	public function getRaws(string $operator, float $lat, float $long, int $radiusMetres): array{
-		$where = ['row_operator' => $operator, 'row_point' => new Distance(new Point($lat, $long), 2 * $radiusMetres)];
+	public function getOperators(): array{
+		$operators = $this->db->getQuery('raws', [], [], null, [], 'row_operator');
+		
+		if($operators == null) $operators = [];
+		else if((count($operators) - count($operators, COUNT_RECURSIVE)) == 0) $operators = [$operators];
+		
+		$newOperators = [];
+		foreach($operators as $operator) $newOperators[] = $operator['row_operator'];
+		
+		return $newOperators;
+	}
+	
+	public function getRaws(string $operator, float $lat, float $long, int $radiusMetres, int $type): array{
+		$where = ['row_operator' => $operator, 'row_point' => new Distance(new Point($lat, $long), 2 * $radiusMetres), 'row_type' => $type];
 		
 		$raws = $this->db->getQuery('raws', $where, ['row_creation_date' => 'desc'], 1000);
 		if($raws == null) $raws = [];
@@ -111,18 +125,19 @@ class RawsModel{
 			$newRaws[] = $newRaw;
 		}
 		
-		$averagedPoints = $this->averagePoints($newRaws, $newRaws, [], round(0.2 * $radiusMetres));
+		$averagedPoints = $this->averagePoints($newRaws, $newRaws, [], round(0.2 * $radiusMetres), $type);
 		
 		return $averagedPoints;
 	}
 	
-	public function sendRaw(string $operator, float $lat, float $long, float $speed, int $strength, string $device): void{
+	public function sendRaw(string $operator, float $lat, float $long, float $speed, int $strength, string $device, int $type): void{
 		$insertData = [
 			'row_point' => new Point($lat, $long),
 			'row_operator' => $operator,
 			'row_device' => $device,
 			'row_speed' => $speed,
 			'row_strength' => $strength,
+			'row_type' => $type,
 		];
 		
 		$this->db->insert('raws', $insertData);

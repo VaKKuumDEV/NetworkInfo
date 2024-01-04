@@ -13,42 +13,52 @@ namespace NetworkInfo.ViewModels
 {
     public class MapViewModel : BaseViewModel
     {
-        public string _operatorName = "Загрузка...";
-        public string OperatorName
+        public ObservableCollection<string> _networks = new ObservableCollection<string>();
+        public ObservableCollection<string> Networks
         {
-            get => _operatorName;
-            set => SetProperty(ref _operatorName, value);
+            get => _networks;
+            set => SetProperty(ref _networks, value);
         }
 
-        public Command LoadPageCommand { get; }
-        public CustomMap Map { get; private set; }
-        public ObservableCollection<PreparedData> Points { get; private set; } = new ObservableCollection<PreparedData>();
+        public CustomMap NetworksMap { get; private set; }
         private bool MapLoaded { get; set; } = false;
         private bool UpdateProcess { get; set; } = false;
+        private Picker NetworksPicker { get; }
 
-        public MapViewModel()
+        public MapViewModel(ref Picker networksPicker)
         {
             Title = "Map";
+            NetworksPicker = networksPicker;
 
-            Map = new CustomMap
+            NetworksMap = new CustomMap
             {
                 HorizontalOptions = LayoutOptions.Fill,
                 VerticalOptions = LayoutOptions.Fill,
                 IsShowingUser = true,
             };
 
-            Map.ZoomChanged += new EventHandler<MapZoomChangedEventArgs>(async (sender, args) =>
+            NetworksMap.ZoomChanged += new EventHandler<MapZoomChangedEventArgs>(async (sender, args) =>
             {
-                if (MapLoaded && !UpdateProcess)
+                if (MapLoaded && !UpdateProcess && NetworksPicker.SelectedIndex != -1 && NetworksPicker.SelectedIndex < Networks.Count)
                 {
                     Models.NetworkInfo networkInfo = await DependencyService.Get<INetworkState>().GetNetworkInfo();
-                    OperatorName = networkInfo.Name;
-                    await UpdatePoints(args.Span, networkInfo.Name);
+                    await UpdatePoints(args.Span, Networks[NetworksPicker.SelectedIndex], networkInfo.Type);
                 }
             });
 
-            LoadPageCommand = new Command(() => ExecuteLoadPageCommand());
+            NetworksPicker.SelectedIndexChanged += NetworksPicker_SelectedIndexChanged;
+
             ExecuteLoadPageCommand();
+        }
+
+        private async void NetworksPicker_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int index = NetworksPicker.SelectedIndex;
+            if (MapLoaded && !UpdateProcess && index != -1 && index < Networks.Count)
+            {
+                Models.NetworkInfo networkInfo = await DependencyService.Get<INetworkState>().GetNetworkInfo();
+                await UpdatePoints(new MapSpan(NetworksMap.VisibleRegion.Center, NetworksMap.VisibleRegion.LatitudeDegrees, NetworksMap.VisibleRegion.LatitudeDegrees), Networks[index], networkInfo.Type);
+            }
         }
 
         private async void ExecuteLoadPageCommand()
@@ -70,8 +80,20 @@ namespace NetworkInfo.ViewModels
 
                     MapLoaded = true;
                     MapSpan mapSpan = new MapSpan(new Position(location.Latitude, location.Longitude), 0.1, 0.1);
-                    Map.MoveToRegion(mapSpan);
+                    NetworksMap.MoveToRegion(mapSpan);
                 }
+
+                Models.NetworkInfo networkInfo = await DependencyService.Get<INetworkState>().GetNetworkInfo();
+                List<string> serverNetworks = await WebApi.GetOperators();
+                Networks = new ObservableCollection<string>(serverNetworks);
+
+                int operatorIndex;
+                if ((operatorIndex = Networks.IndexOf(networkInfo.Name)) == -1)
+                {
+                    Networks.Add(networkInfo.Name);
+                    NetworksPicker.SelectedIndex = Networks.Count - 1;
+                }
+                else NetworksPicker.SelectedIndex = operatorIndex;
             }
             catch (Exception ex)
             {
@@ -83,12 +105,12 @@ namespace NetworkInfo.ViewModels
             }
         }
 
-        public async Task UpdatePoints(MapSpan span, string op) 
+        public async Task UpdatePoints(MapSpan span, string op, Models.NetworkInfo.NetworkTypes type) 
         {
             UpdateProcess = true;
-            Map.Pins.Clear();
-            Map.MapElements.Clear();
-            List<PreparedData> points = await WebApi.GetLastRaw(op, span.Center.Latitude, span.Center.Longitude, (int)span.Radius.Meters);
+            NetworksMap.Pins.Clear();
+            NetworksMap.MapElements.Clear();
+            List<PreparedData> points = await WebApi.GetLastRaw(op, span.Center.Latitude, span.Center.Longitude, (int)span.Radius.Meters, type);
 
             foreach (PreparedData point in points)
             {
@@ -109,13 +131,13 @@ namespace NetworkInfo.ViewModels
                         Center = new Position(point.Lat, point.Long),
                     };
 
-                    Map.MapElements.Add(circle);
+                    NetworksMap.MapElements.Add(circle);
                 }
 
                 string pinLabel = "Средняя скорость " + point.Speed.ToString("0.00") + "Кб/сек";
                 Pin pin = new Pin() { Position = new Position(point.Lat, point.Long), Label = pinLabel };
-                
-                Map.Pins.Add(pin);
+
+                NetworksMap.Pins.Add(pin);
             }
 
             UpdateProcess = false;

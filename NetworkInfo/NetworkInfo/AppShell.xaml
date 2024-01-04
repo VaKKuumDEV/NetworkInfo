@@ -30,8 +30,8 @@
     </Shell.Resources>
 
     <TabBar>
-        <ShellContent Title="Info" Icon="icon_about.png" Route="NetworkInfoPage" ContentTemplate="{DataTemplate local:NetworkInfoPage}" />
-        <ShellContent Title="Map" Icon="icon_feed.png" ContentTemplate="{DataTemplate local:MapPage}" />
+        <ShellContent Title="Сеть" Icon="icon_about.png" Route="NetworkInfoPage" ContentTemplate="{DataTemplate local:NetworkInfoPage}" />
+        <ShellContent Title="Карта" Icon="icon_feed.png" ContentTemplate="{DataTemplate local:MapPage}" />
     </TabBar>
 
 

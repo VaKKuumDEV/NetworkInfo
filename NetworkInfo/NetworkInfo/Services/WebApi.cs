@@ -11,7 +11,7 @@ namespace NetworkInfo.Services
 {
     public static class WebApi
     {
-        public static async Task<List<PreparedData>> GetLastRaw(string op, double lat, double lon, int radius)
+        public static async Task<List<PreparedData>> GetLastRaw(string op, double lat, double lon, int radius, Models.NetworkInfo.NetworkTypes type)
         {
             JObject answer = await Utils.ApiGet(new Dictionary<string, string>()
             {
@@ -20,6 +20,7 @@ namespace NetworkInfo.Services
                 ["lat"] = lat.ToString("0.000000", CultureInfo.InvariantCulture),
                 ["long"] = lon.ToString("0.000000", CultureInfo.InvariantCulture),
                 ["radius"] = radius.ToString(),
+                ["type"] = ((int)type).ToString(),
             });
 
             JArray rawsArray = answer.Value<JArray>("points");
@@ -36,6 +37,19 @@ namespace NetworkInfo.Services
             return results;
         }
 
+        public static async Task<List<string>> GetOperators()
+        {
+            JObject answer = await Utils.ApiGet(new Dictionary<string, string>()
+            {
+                ["method"] = "operators",
+            });
+
+            JArray operatorsArray = answer.Value<JArray>("operators");
+            List<string> results = new List<string>(operatorsArray.Cast<JValue>().Select(item => item.Value<string>()));
+
+            return results;
+        }
+
         public static async Task Send(PreparedData data)
         {
             JObject answer = await Utils.ApiPost(new Dictionary<string, object>()
@@ -47,6 +61,7 @@ namespace NetworkInfo.Services
                 ["long"] = data.Long.ToString("0.000000", CultureInfo.InvariantCulture),
                 ["speed"] = data.Speed.ToString("0.000000", CultureInfo.InvariantCulture),
                 ["strength"] = data.Strength.ToString(),
+                ["type"] = ((int)data.Type).ToString(),
             });
         }
     }

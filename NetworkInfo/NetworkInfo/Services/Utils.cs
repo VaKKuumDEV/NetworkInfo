@@ -12,7 +12,7 @@ namespace NetworkInfo.Services
 {
     public static class Utils
     {
-        public const string API_URL = "https://test.gimly.su/api.php";
+        public const string API_URL = "https://network.gimly.su/api.php";
 
         public static async Task<string> PostRequest(string url)
         {
@@ -51,12 +51,12 @@ namespace NetworkInfo.Services
                 }
             }
 
-            HttpClientHandler handler = new HttpClientHandler()
+            HttpClientHandler handler = new HttpClientHandler
             {
                 ClientCertificateOptions = ClientCertificateOption.Automatic,
                 SslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Ssl3,
+                ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; }
             };
-            handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
 
             HttpClient client = new HttpClient(handler)
             {
@@ -88,8 +88,8 @@ namespace NetworkInfo.Services
             {
                 AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
                 SslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Ssl3,
+                ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; }
             };
-            handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
 
             if (proxy != null)
             {

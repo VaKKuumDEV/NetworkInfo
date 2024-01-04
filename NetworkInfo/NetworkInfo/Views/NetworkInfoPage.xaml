@@ -33,7 +33,15 @@
                     </Grid>
 
                     <Grid HorizontalOptions="Fill" VerticalOptions="Fill" Grid.Column="1" Padding="8">
-                        <Image Source="{Binding StrengthImage}"/>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <Image Source="{Binding StrengthImage}" Grid.Row="0"/>
+                            <Label Text="{Binding NetworkType}" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" FontSize="28" FontAttributes="Bold" Grid.Row="1"/>
+                        </Grid>
                     </Grid>
                 </Grid>
 

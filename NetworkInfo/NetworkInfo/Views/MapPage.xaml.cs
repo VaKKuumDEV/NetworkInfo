@@ -14,7 +14,7 @@ namespace NetworkInfo.Views
         {
             InitializeComponent();
 
-            BindingContext = MapViewModel = new MapViewModel();
+            BindingContext = MapViewModel = new MapViewModel(ref NetworksPicker);
         }
 
         protected override void OnAppearing()

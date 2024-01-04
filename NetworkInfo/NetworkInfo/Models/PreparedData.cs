@@ -21,6 +21,7 @@ namespace NetworkInfo.Models
         [JsonProperty("speed")] public double Speed { get; set; }
         [JsonProperty("strength")] public int Strength { get; set; }
         [JsonProperty("radius")] public double Radius { get; set; }
+        [JsonProperty("type")] public NetworkInfo.NetworkTypes Type { get; set; }
         [JsonIgnore] public DateTime CreationDate { get; set; }
         [JsonIgnore] public SignalLevels Level { get
             {
@@ -33,7 +34,7 @@ namespace NetworkInfo.Models
             }
         }
 
-        public PreparedData(string op, string device, double lat, double longitude, double speed, int strength)
+        public PreparedData(string op, string device, double lat, double longitude, double speed, int strength, NetworkInfo.NetworkTypes type)
         {
             Operator = op;
             Device = device;
@@ -43,6 +44,7 @@ namespace NetworkInfo.Models
             Strength = strength;
             CreationDate = DateTime.Now;
             Radius = 0;
+            Type = type;
         }
     }
 }

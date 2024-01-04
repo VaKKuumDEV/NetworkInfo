@@ -24,19 +24,24 @@ if(isset($_REQUEST['method'])){
 				$long = floatval($_REQUEST['long']);
 				$speed = floatval($_REQUEST['speed']);
 				$strength = intval($_REQUEST['strength']);
+				$type = intval($_REQUEST['type']);
 				
-				RawsModel::newInstance()->sendRaw($operator, $lat, $long, $speed, $strength, $device);
+				RawsModel::newInstance()->sendRaw($operator, $lat, $long, $speed, $strength, $device, $type);
 				
 				$answer = ['code' => 1, 'message' => 'Данные отправлены'];
 			}
+		}if($method == 'operators'){
+			$operators = RawsModel::newInstance()->getOperators();
+			$answer = ['code' => 1, 'message' => 'Данные об операторах', 'operators' => $operators];
 		}else if($method == 'map'){
 			if(isset($_REQUEST['operator'], $_REQUEST['lat'], $_REQUEST['long'], $_REQUEST['radius'])){
 				$operator = $_REQUEST['operator'];
 				$lat = floatval($_REQUEST['lat']);
 				$long = floatval($_REQUEST['long']);
 				$radius = intval($_REQUEST['radius']);
+				$type = intval($_REQUEST['type']);
 				
-				$points = RawsModel::newInstance()->getRaws($operator, $lat, $long, $radius);
+				$points = RawsModel::newInstance()->getRaws($operator, $lat, $long, $radius, $type);
 				
 				$answer = ['code' => 1, 'message' => 'Данные о точках', 'points' => $points];
 			}
